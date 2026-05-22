@@ -54,12 +54,12 @@
 
   /* Categoria badge inline */
   .categoria-result { display:none; grid-column:1/-1; }
-  .cat-box { display:flex; align-items:center; gap:16px; background:rgba(240,171,0,.08); border:1px solid rgba(240,171,0,.3); border-radius:10px; padding:14px 18px; }
-  .cat-letter { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:2.8rem; color:var(--gold); line-height:1; width:44px; text-align:center; }
-  .cat-info { flex:1; }
-  .cat-info .cat-name { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text); }
-  .cat-info .cat-range { font-size:.85rem; color:var(--text-muted); margin-top:2px; }
-  .cat-check { color:var(--gold); font-size:1.4rem; }
+  .cat-box { display:flex; align-items:center; gap:16px; background:rgba(240,171,0,.08); border:1px solid rgba(240,171,0,.3); border-radius:10px; padding:16px 20px; }
+  .cat-letter { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.4rem; color:var(--gold); line-height:1; background:rgba(240,171,0,.15); border:1px solid rgba(240,171,0,.4); border-radius:8px; padding:7px 12px; white-space:nowrap; flex-shrink:0; letter-spacing:.06em; }
+  .cat-info { flex:1; min-width:0; }
+  .cat-info .cat-name { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:1.15rem; color:var(--text); }
+  .cat-info .cat-range { font-size:.85rem; color:var(--text-muted); margin-top:3px; }
+  .cat-check { color:var(--gold); font-size:1.4rem; flex-shrink:0; }
 
   .upload-zone { border:2px dashed var(--border); border-radius:10px; padding:28px 20px; text-align:center; cursor:pointer; transition:all .2s; background:#1a1a1a; position:relative; }
   .upload-zone:hover, .upload-zone.drag-over { border-color:var(--gold); background:rgba(240,171,0,.06); }
