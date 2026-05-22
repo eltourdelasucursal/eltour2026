@@ -162,7 +162,7 @@
         </div>
         <div class="form-group">
           <label>G&eacute;nero *</label>
-          <select name="genero" required>
+          <select name="genero" required onchange="calcularCategoria(document.getElementById('anioNac').value)">
             <option value="">Selecciona...</option>
             <option value="Masculino">Masculino</option>
             <option value="Femenino">Femenino</option>
@@ -185,7 +185,7 @@
 
         <div class="form-group">
           <label>A&ntilde;o de nacimiento *</label>
-          <input type="number" name="anio_nac" id="anioNac" placeholder="Ej: 1985" min="1940" max="1996" required oninput="calcularCategoria(this.value)">
+          <input type="number" name="anio_nac" id="anioNac" placeholder="Ej: 1985" min="1961" max="2009" required oninput="calcularCategoria(this.value)">
         </div>
         <div class="form-group">
           <label>Edad (2026)</label>
@@ -273,21 +273,34 @@
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJ5TvuCRFa3e6Vs7DzvihBHdt-6vZ69JIvb0pfOnK6bZKS3fmt4xCCP69MF57FEiZD/exec';
 
-// ── CATEGORÍAS MASTER (año de nacimiento, para 2026) ──
-const CATEGORIAS = [
-  { letra:'A', nombre:'Master A', edadDesde:30, edadHasta:39, nacDesde:1987, nacHasta:1996 },
-  { letra:'B', nombre:'Master B', edadDesde:40, edadHasta:48, nacDesde:1978, nacHasta:1986 },
-  { letra:'C', nombre:'Master C', edadDesde:49, edadHasta:56, nacDesde:1970, nacHasta:1977 },
-  { letra:'D', nombre:'Master D', edadDesde:57, edadHasta:64, nacDesde:1962, nacHasta:1969 },
-  { letra:'E', nombre:'Master E', edadDesde:65, edadHasta:null, nacDesde:null, nacHasta:1961 },
-];
-
-function getCategoria(anio) {
+// ── CATEGORÍAS (año de nacimiento, para 2026) ──
+// Lógica por género y edad
+function getCategoria(anio, genero) {
   const edad = 2026 - parseInt(anio);
-  return CATEGORIAS.find(c => {
-    if (c.letra === 'E') return edad >= 65;
-    return edad >= c.edadDesde && edad <= c.edadHasta;
-  }) || null;
+  const esM = genero === 'Masculino';
+  const esF = genero === 'Femenino';
+
+  if (edad >= 17 && edad <= 18) {
+    if (esM) return { letra:'JUV-H', nombre:'Juvenil Hombres',        rango:'17–18 años' };
+    if (esF) return { letra:'JUV-D', nombre:'Juvenil Damas',           rango:'17–18 años' };
+  }
+  if (edad >= 19 && edad <= 30 && esM)
+    return { letra:'S23-H', nombre:'Élite y Sub23 Hombres', rango:'19–30 años' };
+  if (edad >= 19 && edad <= 29 && esF)
+    return { letra:'S23-D', nombre:'Élite y Sub23 Damas',   rango:'19–29 años' };
+  if (edad >= 30 && esF)
+    return { letra:'DAM',   nombre:'Categoría Damas',        rango:'30 años en adelante' };
+  if (edad >= 30 && edad <= 39 && esM)
+    return { letra:'A',     nombre:'Categoría A',             rango:'30–39 años masculino' };
+  if (edad >= 40 && edad <= 48 && esM)
+    return { letra:'B',     nombre:'Categoría B',             rango:'40–48 años masculino' };
+  if (edad >= 49 && edad <= 56 && esM)
+    return { letra:'C',     nombre:'Categoría C',             rango:'49–56 años masculino' };
+  if (edad >= 57 && edad <= 64 && esM)
+    return { letra:'D',     nombre:'Categoría D',             rango:'57–64 años masculino' };
+  if (edad >= 65 && esM)
+    return { letra:'E',     nombre:'Categoría E',             rango:'65 en adelante masculino' };
+  return null;
 }
 
 function calcularCategoria(val) {
@@ -295,8 +308,9 @@ function calcularCategoria(val) {
   const resultDiv = document.getElementById('categoriaResult');
   const edadInput = document.getElementById('edadDisplay');
   const hidden    = document.getElementById('categoriaHidden');
+  const genero    = document.querySelector('[name=genero]').value;
 
-  if (!anio || anio < 1940 || anio > 1996) {
+  if (!anio || anio < 1961 || anio > 2009) {
     resultDiv.style.display = 'none';
     edadInput.value = '';
     hidden.value = '';
@@ -306,14 +320,18 @@ function calcularCategoria(val) {
   const edad = 2026 - anio;
   edadInput.value = edad + ' años';
 
-  const cat = getCategoria(anio);
+  if (!genero) {
+    resultDiv.style.display = 'none';
+    hidden.value = '';
+    edadInput.value = edad + ' años — selecciona género para ver categoría';
+    return;
+  }
+
+  const cat = getCategoria(anio, genero);
   if (cat) {
     document.getElementById('catLetra').textContent  = cat.letra;
     document.getElementById('catNombre').textContent = cat.nombre;
-    document.getElementById('catRango').textContent  =
-      cat.letra === 'E'
-        ? `${cat.edadDesde} años en adelante · Nacidos en ${cat.nacHasta} o antes`
-        : `${cat.edadDesde}–${cat.edadHasta} años · Nacidos ${cat.nacDesde}–${cat.nacHasta}`;
+    document.getElementById('catRango').textContent  = cat.rango;
     hidden.value = cat.letra + ' - ' + cat.nombre;
     resultDiv.style.display = 'block';
   } else {
@@ -436,7 +454,7 @@ async function consultar() {
     if (data.status === 'ok' && data.inscripcion) {
       const ins = data.inscripcion;
       document.getElementById('resultNombre').textContent = ins.nombre + ' ' + ins.apellido;
-      const pagado = ['sí','si','yes','1','true'].includes((ins.pago_confirmado||'').toLowerCase().trim());
+      const pagado = ['sí','si','yes','1','true'].includes(String(ins.pago_confirmado||'').toLowerCase().trim());
       document.getElementById('statusDot').className = 'status-dot ' + (pagado?'paid':'unpaid');
       document.getElementById('resultStatus').textContent = pagado ? 'Pago confirmado ✓' : 'Pago pendiente';
       document.getElementById('resultGrid').innerHTML = `
