@@ -436,7 +436,7 @@ async function consultar() {
     if (data.status === 'ok' && data.inscripcion) {
       const ins = data.inscripcion;
       document.getElementById('resultNombre').textContent = ins.nombre + ' ' + ins.apellido;
-      const pagado = (ins.pago_confirmado||'').toLowerCase() === 'sí';
+      const pagado = ['sí', 'si', 'yes', '1', 'true'].includes((ins.pago_confirmado || '').toLowerCase().trim());
       document.getElementById('statusDot').className = 'status-dot ' + (pagado?'paid':'unpaid');
       document.getElementById('resultStatus').textContent = pagado ? 'Pago confirmado ✓' : 'Pago pendiente';
       document.getElementById('resultGrid').innerHTML = `
