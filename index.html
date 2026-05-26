@@ -177,6 +177,10 @@
           <input type="text" name="ciudad" placeholder="Tu ciudad" required>
         </div>
         <div class="form-group full">
+          <label>Correo electrónico <span style="color:var(--text-muted);font-size:.8rem;text-transform:none;letter-spacing:0">(para recibir confirmación)</span></label>
+          <input type="email" name="email" placeholder="tucorreo@gmail.com">
+        </div>
+        <div class="form-group full">
           <label>Equipo / Club</label>
           <input type="text" name="equipo" placeholder="Nombre de tu equipo o club (opcional)">
         </div>
@@ -359,12 +363,12 @@ function setModo(modo) {
 }
 
 function getEdadAlEvento(fechaNac) {
-  // Fecha del evento: 2026 — usamos fecha actual como referencia
-  const hoy = new Date();
-  const nac = new Date(fechaNac);
-  let edad = hoy.getFullYear() - nac.getFullYear();
-  const cumpleEsteAnio = new Date(hoy.getFullYear(), nac.getMonth(), nac.getDate());
-  if (hoy < cumpleEsteAnio) edad--; // aún no ha cumplido años este año
+  // Edad cumplida al día del evento: 14 de junio de 2026
+  const evento = new Date(2026, 5, 14); // mes 5 = junio (0-indexado)
+  const nac    = new Date(fechaNac);
+  let edad = evento.getFullYear() - nac.getFullYear();
+  const cumpleEseAnio = new Date(evento.getFullYear(), nac.getMonth(), nac.getDate());
+  if (evento < cumpleEseAnio) edad--; // aún no habrá cumplido para el 14 jun
   return edad;
 }
 
@@ -486,6 +490,7 @@ async function submitInscripcion(e) {
       ciudad:                form.ciudad.value.trim(),
       equipo:                form.equipo.value.trim(),
       punto_kit:             form.punto_kit.value,
+      email:                 form.email.value.trim(),
       fecha_nac:             form.fecha_nac.value,
       categoria:             form.categoria.value,
       emergencia_nombre:     form.emergencia_nombre.value.trim(),
