@@ -181,7 +181,16 @@
           <input type="text" name="equipo" placeholder="Nombre de tu equipo o club (opcional)">
         </div>
 
-        <div class="section-label">Categor&iacute;a Master</div>
+        <div class="form-group full">
+          <label>Punto de recogida del kit *</label>
+          <select name="punto_kit" required>
+            <option value="">Selecciona el punto...</option>
+            <option value="Specialized 66">Specialized 66</option>
+            <option value="Specialized Norte">Specialized Norte</option>
+          </select>
+        </div>
+
+        <div class="section-label">Categor&iacute;a</div>
 
         <div class="form-group">
           <label>A&ntilde;o de nacimiento *</label>
@@ -191,6 +200,21 @@
           <label>Edad (2026)</label>
           <input type="text" id="edadDisplay" placeholder="Se calcula automáticamente" readonly style="background:#1a1a1a; color:var(--text-muted); cursor:default;">
         </div>
+
+        <div class="form-group full" style="margin-bottom:4px;">
+          <label>¿Participas de forma competitiva o recreativa?</label>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button type="button" id="btnCompetitiva" onclick="setModo('competitiva')"
+              style="flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:var(--black);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;">
+              COMPETITIVA
+            </button>
+            <button type="button" id="btnRecreativa" onclick="setModo('recreativa')"
+              style="flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;">
+              RECREATIVA
+            </button>
+          </div>
+        </div>
+        <input type="hidden" name="modo" id="modoHidden" value="competitiva">
 
         <div class="categoria-result" id="categoriaResult">
           <div class="cat-box">
@@ -300,10 +324,36 @@ function getCategoria(anio, genero) {
     return { letra:'D',     nombre:'Categoría D',             rango:'57–64 años masculino' };
   if (edad >= 65 && esM)
     return { letra:'E',     nombre:'Categoría E',             rango:'65 en adelante masculino' };
-  return null;
+  // Si no encaja en ninguna categoría competitiva → Recreativa
+  return { letra:'REC', nombre:'Recreativa', rango:'Todas las edades' };
+}
+
+let modoParticipacion = 'competitiva';
+
+function setModo(modo) {
+  modoParticipacion = modo;
+  const btnC = document.getElementById('btnCompetitiva');
+  const btnR = document.getElementById('btnRecreativa');
+  document.getElementById('modoHidden').value = modo;
+  const anioSection = document.getElementById('anioNac').closest('.form-group');
+
+  if (modo === 'recreativa') {
+    btnC.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
+    btnR.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
+    document.getElementById('categoriaResult').style.display = 'block';
+    document.getElementById('catLetra').textContent  = 'REC';
+    document.getElementById('catNombre').textContent = 'Recreativa';
+    document.getElementById('catRango').textContent  = 'Todas las edades';
+    document.getElementById('categoriaHidden').value = 'REC - Recreativa';
+  } else {
+    btnC.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
+    btnR.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
+    calcularCategoria(document.getElementById('anioNac').value);
+  }
 }
 
 function calcularCategoria(val) {
+  if (modoParticipacion === 'recreativa') return; // categoría fija
   const anio = parseInt(val);
   const resultDiv = document.getElementById('categoriaResult');
   const edadInput = document.getElementById('edadDisplay');
@@ -412,6 +462,7 @@ async function submitInscripcion(e) {
       celular:               form.celular.value.trim(),
       ciudad:                form.ciudad.value.trim(),
       equipo:                form.equipo.value.trim(),
+      punto_kit:             form.punto_kit.value,
       anio_nac:              form.anio_nac.value.trim(),
       categoria:             form.categoria.value,
       emergencia_nombre:     form.emergencia_nombre.value.trim(),
@@ -463,6 +514,7 @@ async function consultar() {
         <div class="result-item"><label>Celular</label><p>${ins.celular}</p></div>
         <div class="result-item"><label>Ciudad</label><p>${ins.ciudad}</p></div>
         <div class="result-item"><label>Equipo</label><p>${ins.equipo||'—'}</p></div>
+        <div class="result-item"><label>Punto de kit</label><p>${ins.punto_kit||'—'}</p></div>
         <div class="result-item"><label>Año nacimiento</label><p>${ins.anio_nac}</p></div>
         <div class="result-item" style="grid-column:1/-1"><label>Categoría</label>
           <span class="cat-badge-result">🏆 ${ins.categoria}</span>
