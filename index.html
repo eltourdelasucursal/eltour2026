@@ -162,7 +162,7 @@
         </div>
         <div class="form-group">
           <label>G&eacute;nero *</label>
-          <select name="genero" required onchange="calcularCategoria(document.getElementById('anioNac').value)">
+          <select name="genero" required onchange="calcularCategoria(document.getElementById('fechaNac').value)">
             <option value="">Selecciona...</option>
             <option value="Masculino">Masculino</option>
             <option value="Femenino">Femenino</option>
@@ -193,11 +193,14 @@
         <div class="section-label">Categor&iacute;a</div>
 
         <div class="form-group">
-          <label>A&ntilde;o de nacimiento *</label>
-          <input type="number" name="anio_nac" id="anioNac" placeholder="Ej: 1985" min="1961" max="2009" required oninput="calcularCategoria(this.value)">
+          <label>Fecha de nacimiento *</label>
+          <input type="date" name="fecha_nac" id="fechaNac" required
+            min="1961-01-01" max="2009-12-31"
+            onchange="calcularCategoria(this.value)"
+            style="color-scheme:dark;">
         </div>
         <div class="form-group">
-          <label>Edad (2026)</label>
+          <label>Edad actual</label>
           <input type="text" id="edadDisplay" placeholder="Se calcula automáticamente" readonly style="background:#1a1a1a; color:var(--text-muted); cursor:default;">
         </div>
 
@@ -299,8 +302,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJ5TvuCRFa3e6Vs7Dzv
 
 // ── CATEGORÍAS (año de nacimiento, para 2026) ──
 // Lógica por género y edad
-function getCategoria(anio, genero) {
-  const edad = 2026 - parseInt(anio);
+function getCategoria(edad, genero) {
   const esM = genero === 'Masculino';
   const esF = genero === 'Femenino';
 
@@ -348,26 +350,43 @@ function setModo(modo) {
   } else {
     btnC.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
     btnR.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
-    calcularCategoria(document.getElementById('anioNac').value);
+    calcularCategoria(document.getElementById('fechaNac').value);
   }
 }
 
+function getEdadAlEvento(fechaNac) {
+  // Fecha del evento: 2026 — usamos fecha actual como referencia
+  const hoy = new Date();
+  const nac = new Date(fechaNac);
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const cumpleEsteAnio = new Date(hoy.getFullYear(), nac.getMonth(), nac.getDate());
+  if (hoy < cumpleEsteAnio) edad--; // aún no ha cumplido años este año
+  return edad;
+}
+
 function calcularCategoria(val) {
-  if (modoParticipacion === 'recreativa') return; // categoría fija
-  const anio = parseInt(val);
+  if (modoParticipacion === 'recreativa') return;
   const resultDiv = document.getElementById('categoriaResult');
   const edadInput = document.getElementById('edadDisplay');
   const hidden    = document.getElementById('categoriaHidden');
   const genero    = document.querySelector('[name=genero]').value;
 
-  if (!anio || anio < 1961 || anio > 2009) {
+  if (!val) {
     resultDiv.style.display = 'none';
     edadInput.value = '';
     hidden.value = '';
     return;
   }
 
-  const edad = 2026 - anio;
+  const edad = getEdadAlEvento(val);
+
+  if (edad < 17 || edad > 100) {
+    resultDiv.style.display = 'none';
+    edadInput.value = edad + ' años — fuera de rango';
+    hidden.value = '';
+    return;
+  }
+
   edadInput.value = edad + ' años';
 
   if (!genero) {
@@ -377,7 +396,7 @@ function calcularCategoria(val) {
     return;
   }
 
-  const cat = getCategoria(anio, genero);
+  const cat = getCategoria(edad, genero);
   if (cat) {
     document.getElementById('catLetra').textContent  = cat.letra;
     document.getElementById('catNombre').textContent = cat.nombre;
@@ -463,7 +482,7 @@ async function submitInscripcion(e) {
       ciudad:                form.ciudad.value.trim(),
       equipo:                form.equipo.value.trim(),
       punto_kit:             form.punto_kit.value,
-      anio_nac:              form.anio_nac.value.trim(),
+      fecha_nac:             form.fecha_nac.value,
       categoria:             form.categoria.value,
       emergencia_nombre:     form.emergencia_nombre.value.trim(),
       emergencia_parentesco: form.emergencia_parentesco.value.trim(),
@@ -515,7 +534,7 @@ async function consultar() {
         <div class="result-item"><label>Ciudad</label><p>${ins.ciudad}</p></div>
         <div class="result-item"><label>Equipo</label><p>${ins.equipo||'—'}</p></div>
         <div class="result-item"><label>Punto de kit</label><p>${ins.punto_kit||'—'}</p></div>
-        <div class="result-item"><label>Año nacimiento</label><p>${ins.anio_nac}</p></div>
+        <div class="result-item"><label>Fecha nacimiento</label><p>${ins.fecha_nac}</p></div>
         <div class="result-item" style="grid-column:1/-1"><label>Categoría</label>
           <span class="cat-badge-result">🏆 ${ins.categoria}</span>
         </div>
