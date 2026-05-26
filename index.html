@@ -332,24 +332,28 @@ function getCategoria(edad, genero) {
 
 let modoParticipacion = 'competitiva';
 
+const ESTILO_ACTIVO   = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
+const ESTILO_INACTIVO = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid #2A2A2A;background:transparent;color:#888;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
+
 function setModo(modo) {
   modoParticipacion = modo;
+  document.getElementById('modoHidden').value = modo;
   const btnC = document.getElementById('btnCompetitiva');
   const btnR = document.getElementById('btnRecreativa');
-  document.getElementById('modoHidden').value = modo;
-  const anioSection = document.getElementById('anioNac').closest('.form-group');
 
   if (modo === 'recreativa') {
-    btnC.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
-    btnR.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
-    document.getElementById('categoriaResult').style.display = 'block';
+    btnC.style.cssText = ESTILO_INACTIVO;
+    btnR.style.cssText = ESTILO_ACTIVO;
+    // Forzar categoría Recreativa sin importar lo que haya calculado antes
     document.getElementById('catLetra').textContent  = 'REC';
     document.getElementById('catNombre').textContent = 'Recreativa';
     document.getElementById('catRango').textContent  = 'Todas las edades';
     document.getElementById('categoriaHidden').value = 'REC - Recreativa';
+    document.getElementById('categoriaResult').style.display = 'block';
   } else {
-    btnC.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
-    btnR.style.cssText = 'flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;cursor:pointer;';
+    btnC.style.cssText = ESTILO_ACTIVO;
+    btnR.style.cssText = ESTILO_INACTIVO;
+    // Recalcular categoría competitiva con la fecha que ya ingresó
     calcularCategoria(document.getElementById('fechaNac').value);
   }
 }
